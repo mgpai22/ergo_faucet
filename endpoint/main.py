@@ -1,45 +1,40 @@
-import time
+from fastapi import FastAPI, Form, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 
-import requests
-from ergpy import helper_functions, appkit
+import SQL_functions
+import ergo
+import uuid
 
-# Create connection to the blockchain
-node_url: str = "http://213.239.193.208:9052/"  # MainNet or TestNet
-ergo = appkit.ErgoAppKit(node_url=node_url)
-wallet_mnemonic = "gate swing banana royal feed pudding aim grow typical secret keep cabin curve pitch bus"
+app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-def block():
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
+@app.post("/faucet_api")
+async def faucet_api(bg_tasks: BackgroundTasks, address: str = Form()):
+    if ergo.address_validity(address):
+        uu_id = str(uuid.uuid4())
+        bg_tasks.add_task(ergo.getERG, address, uu_id)
+        return {"task_id": uu_id}
+    return "Error"
+
+
+@app.get("/api_hash/{task_id}")
+async def api_hash(task_id):
     try:
-        URL = f'{node_url}info'
-        return requests.get(URL).json()['fullHeight']
+        return {"tx_hash": SQL_functions.query_faucet_table(task_id)[1]}
     except Exception as e:
-        time.sleep(30)
-        URL = f'{node_url}info'
-        return requests.get(URL).json()['fullHeight']
-
-
-def blockTime(block):
-    URL = f'{node_url}info'
-    height = requests.get(URL).json()['fullHeight']
-    if height == block:
-        return height
-    elif block < height:
-        return height
-    time.sleep(10)
-    return blockTime(block)
-
-
-def blockHeight(block):
-    blockTime(block)
-    return True
-
-
-def getERG(receiver_address):
-    blockHeight(block() + 1)
-    return helper_functions.simple_send(ergo=ergo, amount=[0.01], wallet_mnemonic=wallet_mnemonic,
-                                        receiver_addresses=[receiver_address])
-
-
-def exit():
-    helper_functions.exit()
+        return {"tx_hash": "None"}

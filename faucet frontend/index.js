@@ -1,26 +1,47 @@
 function getInput(){
-    $body = $("body")
-    $body.addClass("loading")
     let myData = document.getElementById('text').value
     console.log(myData)
-    $.post("http://localhost:5000", {"address": myData})
+    $.post("http://localhost:5000/faucet_api", {"address": myData})
       .done(function( data ) {
-        $body.removeClass("loading")
-        // alert( "Data Loaded: " + data );
         if (data === 'Error'){
             alert("Error, please try again!")
         }
         else {
-        if (window.confirm('Sent!')) 
-        {
-        window.location.href=data
-        };
+        alert("Submitted, please wait for the transaction!")
+        $body = $("body")
+        $body.addClass("loading")
+        getHash(data.task_id)
+        console.log(data.task_id)
     }
       })
       
 }
 
-async function test(){
-    await ergoConnector.nautilus.connect()
-    console.log(await ergo.get_unused_addresses())
+function getHash(taskID) {
+  var checker = setInterval(function(){
+    $.ajax({
+        type: 'GET',
+        url: 'http://localhost:5000/api_hash/' + taskID,
+        contentType: false,
+        cache: false,
+        processData: false,
+        success: function(data) {
+          try{
+          if (data.tx_hash !="None"){
+          $body.removeClass("loading")
+          console.log(`https://testnet.ergoplatform.com/en/transactions/${data.tx_hash}`)
+          stopChecker()
+        if (window.confirm('Sent!')){
+        window.location.href=`https://testnet.ergoplatform.com/en/transactions/${data.tx_hash}`
+        };
+        }
+        
+      } catch (error){}
+      }
+    });
+  }, 3000);
+
+  function stopChecker() {
+    clearInterval(checker)
+  }
 }

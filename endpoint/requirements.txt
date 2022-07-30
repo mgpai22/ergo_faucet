@@ -1,0 +1,6 @@
+ergpy==0.1.8
+fastapi
+python-dotenv
+requests
+uvicorn
+python-multipart
