@@ -1,7 +1,8 @@
 function getInput(){
     let myData = document.getElementById('text').value
     console.log(myData)
-    $.post("https://faucet.ergosapiens.com/faucet_api", {"address": myData})
+    console.log(window._env_.API_URL)
+    $.post("http://{your-ip}:5000/faucet_api", {"address": myData})
       .done(function( data ) {
         if (data === 'Error'){
             alert("Error, please try again!")
@@ -21,7 +22,7 @@ function getHash(taskID) {
   var checker = setInterval(function(){
     $.ajax({
         type: 'GET',
-        url: 'https://faucet.ergosapiens.com/api_hash/' + taskID,
+        url: 'http://{your-ip}:5000/api_hash/' + taskID,
         contentType: false,
         cache: false,
         processData: false,

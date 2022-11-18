@@ -21,14 +21,16 @@ if node_url[-1] != "/":
 ergo = appkit.ErgoAppKit(node_url=node_url)
 wallet_mnemonic = os.getenv("MNEMONIC")
 
+wallet_address = helper_functions.get_wallet_address(ergo=ergo, amount=1, wallet_mnemonic=wallet_mnemonic)
+
 genesis_tx = helper_functions.simple_send(ergo=ergo, amount=[10000], wallet_mnemonic=wallet_mnemonic,
-                                          receiver_addresses=["3WwuVAFns8e74gPrExmyMdi3osiZU2suwc6tew8yN7QaSrv5aFLw"],
+                                          receiver_addresses=wallet_address,
                                           return_signed=True)
 genesis_outbox = appkit.get_outputs_to_spend(genesis_tx, 0)
 ergo.txId(genesis_tx)
 outBox_list = []
 tx_1 = helper_functions.simple_send(ergo=ergo, amount=[0.1], wallet_mnemonic=wallet_mnemonic,
-                                    receiver_addresses=["3WwuVAFns8e74gPrExmyMdi3osiZU2suwc6tew8yN7QaSrv5aFLw"],
+                                    receiver_addresses=wallet_address,
                                     input_box=genesis_outbox,
                                     return_signed=True, chained=True)
 tx_1_outbox = appkit.get_outputs_to_spend(tx_1, 0)
@@ -88,14 +90,12 @@ def getERG(receiver_address, uuid):
             logging.critical(e)
             outBox_list.clear()
             genesis_tx = helper_functions.simple_send(ergo=ergo, amount=[5000], wallet_mnemonic=wallet_mnemonic,
-                                                      receiver_addresses=[
-                                                          "3WwuVAFns8e74gPrExmyMdi3osiZU2suwc6tew8yN7QaSrv5aFLw"],
+                                                      receiver_addresses=wallet_address,
                                                       return_signed=True)
             genesis_outbox = appkit.get_outputs_to_spend(genesis_tx, 0)
             ergo.txId(genesis_tx)
             tx_1 = helper_functions.simple_send(ergo=ergo, amount=[0.1], wallet_mnemonic=wallet_mnemonic,
-                                                receiver_addresses=[
-                                                    "3WwuVAFns8e74gPrExmyMdi3osiZU2suwc6tew8yN7QaSrv5aFLw"],
+                                                receiver_addresses=wallet_address,
                                                 input_box=genesis_outbox,
                                                 return_signed=True, chained=True)
             tx_1_outbox = appkit.get_outputs_to_spend(tx_1, 0)
