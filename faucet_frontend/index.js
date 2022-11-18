@@ -1,7 +1,6 @@
 function getInput(){
     let myData = document.getElementById('text').value
     console.log(myData)
-    console.log(window._env_.API_URL)
     $.post("http://{your-ip}:5000/faucet_api", {"address": myData})
       .done(function( data ) {
         if (data === 'Error'){
